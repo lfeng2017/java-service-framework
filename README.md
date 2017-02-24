@@ -1,4 +1,4 @@
-# 易道PSF框架 Java版
+# PSF框架 Java版
 
 ## 一、工程介绍
 ### 1. psf-server
