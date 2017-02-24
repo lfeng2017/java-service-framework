@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:psf="http://www.yongche.com/schema/psf"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.yongche.com/schema/psf http://www.yongche.com/schema/psf.xsd">
+
+
+    <!-- mmapfile线上线下机器配置 /home/y/var/ycconfig/mmap_cache.conf -->
+    <!--<psf:service-center-manager name="serviceCenterManager" mmapfile="/tmp/y/var/ycconfig/mmap_cache.conf"/>-->
+    <psf:service-center-manager name="serviceCenterManager" service-center="10.0.11.71:5201,10.0.11.72:5201"/>
+
+
+    <bean name="serviceCenter" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean" >
+        <property name="targetObject" ref="serviceCenterManager" />
+        <property name="targetMethod" value="getServiceCenter" />
+    </bean>
+
+    <bean name="psfClient" class="com.yongche.psf.PSFClient" destroy-method="close">
+        <constructor-arg index="0" ref="serviceCenter" />
+        <constructor-arg index="1" value="2000" />
+        <constructor-arg index="2" value="30000" />
+        <constructor-arg index="3" value="640000" />
+        <constructor-arg index="4" value="3" />
+    </bean>
+</beans>

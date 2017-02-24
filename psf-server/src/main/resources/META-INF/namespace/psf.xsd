@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema
+        xmlns="http://www.yongche.com/schema/psf"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:beans="http://www.springframework.org/schema/beans"
+        targetNamespace="http://www.yongche.com/schema/psf"
+        elementFormDefault="qualified"
+        attributeFormDefault="unqualified">
+    <xsd:import namespace="http://www.springframework.org/schema/beans" />
+
+    <xsd:element name="service-center-manager">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <!--<xsd:attribute name="init-method" type="xsd:string" use="optional" default="init"/>-->
+                    <xsd:attribute name="name" type="xsd:string" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation><![CDATA[ The module name. ]]></xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+
+                    <xsd:attribute name="service-center" type="xsd:string" use="required">
+                        <xsd:annotation>
+                            <xsd:documentation><![CDATA[ The mmapfile config file. ]]></xsd:documentation>
+                        </xsd:annotation>
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="server-manager">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="name" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="init-method" type="xsd:string" use="optional" default="init"/>
+                    <xsd:attribute name="port" type="xsd:int" use="required"/>
+                    <xsd:attribute name="service-type" type="xsd:string" use="required"/>
+                    <xsd:attribute name="version" type="xsd:string" use="required"/>
+                    <xsd:attribute name="service-center-manager" type="xsd:string" use="required"/>
+                    <xsd:attribute name="weight" type="xsd:short" use="optional"/>
+                    <xsd:attribute name="io-threads" type="xsd:int" use="optional"/>
+                    <xsd:attribute name="service-threads" type="xsd:int" use="optional"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="service-scan">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="base-package" type="xsd:string" use="required"/>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:element name="client-manager">
+        <xsd:complexType>
+            <xsd:complexContent>
+                <xsd:extension base="beans:identifiedType">
+                    <xsd:attribute name="name" type="xsd:string" use="optional"/>
+                    <xsd:attribute name="destroy-method" type="xsd:string" use="optional" default="destroy"/>
+                    <xsd:attribute name="service-type" type="xsd:string" use="required"/>
+                    <xsd:attribute name="version" type="xsd:string" use="required"/>
+                    <xsd:attribute name="service-center-manager" type="xsd:string" use="required"/>
+                    <xsd:attribute name="client-model" use="optional">
+                        <xsd:simpleType>
+                            <xsd:restriction base="xsd:string">
+                                <xsd:enumeration value="OIO"/>
+                                <xsd:enumeration value="NIO"/>
+                            </xsd:restriction>
+                        </xsd:simpleType>
+                    </xsd:attribute>
+                </xsd:extension>
+            </xsd:complexContent>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>
