@@ -222,3 +222,105 @@ public void testCatInfoAll() throws Exception {
  get --> 5555
  get --> 可乐
 ```
+
+
+=====================================================================================================================================
+
+
+
+Hi，All：
+	1.消费者工程分支 https://git.yongche.org/ycpcs/consumer/tree/RELEASE，版本2.1  配置和Class、机器IP解耦，见配置一：
+        2.包管理工程分支 https://git.yongche.org/ycpcs/yongche-parent/tree/RELEASE 版本 1.1
+        3.配置公共类分支 https://git.yongche.org/ycpcs/config-commons/tree/RELEASE 版本1.2， 见配置二
+		3.1 将Mango和数据源注册到spring容器，数据源在容器内可以复用，
+		3.2 添加配置中心properties，将值以${keyname}的形式注入Bean
+
+
+
+
+配置一：
+     
+1.开始
+        <dependency>
+            <groupId>com.yongche</groupId>
+            <artifactId>consumer</artifactId>
+            <version>2.1</version>
+        </dependency>
+2.配置中心 consumer.xml 属性enabled默认"true"开启，关闭可以配置false
+<consumer>
+  <worker name="appointWorker" vhostIp="10.0.11.209" vhostName="/dispatch" exchange="chelv_appoint" queue="chelv_appoint" count="2"/>
+  <worker name="appointWorker1" vhostIp="10.0.11.215" vhostName="/dispatch" exchange="chelv_appoint" queue="chelv_appoint" count="1"/>
+</consumer>
+3.spring 配置 和java代码 需要添加ConsumerService 注解,默认开启模糊匹配，* 号可以省略
+@ConsumerService("appointWorker*")
+public class CommentWorker extends AbstractWorker {
+        @Override
+        protected boolean doWork(String routeKey, byte[] message)throws UnsupportedEncodingException {
+            //do something
+            return true;
+        }
+}
+ <yongche:consumer-driven base-package="com.yongche.operation"/>
+
+
+
+配置二：
+
+
+1.开始
+        <dependency>
+             <groupId>config-commons</groupId>
+             <artifactId>config-commons</artifactId>
+             <version>1.2</version>
+        </dependency>
+2.配置中心数据源Mango，
+所有数据源注册到spring容器，database注册为一个DataSourceFactory对象，master和slave注册为DataSource对象
+default注册为一个DataSourceFactory，m_default 注册为一个DataSource，
+如果多个slaves注册为 s_default_0，s_default_1 DataSource
+database.xml 配置中心示例：
+<databases>
+  <database name="default">
+    <master host="10.0.11.176" port="3311" db="yongche" connectionTimeout="300" maximumPoolSize="5"/>
+    <slave host="10.0.11.175" port="3311" db="yongche" connectionTimeout="300" maximumPoolSize="5"/>
+    <slave host="10.0.11.174" port="3311" db="yongche" connectionTimeout="300" maximumPoolSize="5"/>
+  </database>
+<databases>
+   <!-- spring 默认配置 -->
+   <bean id="centerDataSourceMango" class="com.yongche.config.database.ConfigCenterDataSourceMango" />
+   <!—- 默认使用DatabaseConfig，可以自定义扩展
+    <bean id="centerDataSourceMango" class="com.yongche.config.database.ConfigCenterDataSourceMango" >
+        <property name="databaseConfigFaces" >
+            <list>
+                <value type="java.lang.Class">com.yongche.config.database.DatabaseConfig</value>
+                <value type="java.lang.Class">com.yongche.operation.CheckDatabaseConfig</value>
+            </list>
+        </property>
+    </bean>
+    -->
+    <context:component-scan base-package="com.yongche.operation" />
+    <bean class="org.jfaster.mango.plugin.spring.MangoDaoScanner">
+        <property name="packages">
+            <list>
+                <value>com.yongche.operation</value>
+            </list>
+        </property>
+    </bean>
+2.配置中心Properties
+ properties.xml 示例：
+<properties>
+  <property key="namespace">test_dev</property>
+  <property key="serverLists">10.0.11.175:2181,10.0.11.176:2181,10.0.11.177:2181</property>
+  <property key="tracker_server_0">10.0.11.225:22122</property>
+  <property key="tracker_server_1">10.0.11.217:22122</property>
+  <name>ConfigCenterProperties</name>
+</properties>
+    <!—- 加载配置中心properties属性 -->
+    <bean id="configProperties" class="com.yongche.config.prop.ConfigCenterPropertiesFactoryBean"/>
+    <!--<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+           <!--<property name="properties" ref="configProperties" />-->
+       <!--</bean>-->
+    <context:property-placeholder properties-ref="configProperties" />
+    <bean id="zkServer" class="com.yongche.operation.zk.ZkServer" >
+            <property name="namespace" value="${namespace}"/>
+            <property name="serverLists" value="${serverLists}"/>
+    </bean>
